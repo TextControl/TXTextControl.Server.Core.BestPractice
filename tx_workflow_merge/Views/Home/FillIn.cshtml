@@ -1,0 +1,89 @@
+﻿@using TXTextControl.Web.MVC.DocumentViewer
+
+@model List<Template>
+
+@{
+    ViewData["Title"] = "Deploy Document";
+}
+
+<nav class="nav navbar-light bg-light p-2">
+    <select id="templateName" class="form-control mx-2">
+        <option value="">Select a template</option>
+        @foreach (var template in Model)
+        {
+            <option value="@template">@template.TemplateName</option>
+        }
+    </select>
+    <button onclick="mergeTemplate()" class="btn btn-sm btn-outline-success mx-2" type="button">Merge and Load</button>
+    <button onclick="finalizeDocument()" class="btn btn-sm btn-primary mx-2" type="button">Submit</button>
+</nav>
+
+<div style="width:100%; height: 600px;">
+
+    @Html.TXTextControl().DocumentViewer(settings =>
+    {
+        settings.Dock = DocumentViewerSettings.DockStyle.Fill;
+        settings.DocumentLoadSettings.PDFJS.LibrarySourcePath = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs";
+        settings.DocumentLoadSettings.PDFJS.WorkerSourcePath = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs";
+    }).Render()
+
+</div>
+
+@section Scripts {
+    <script>
+        
+        var templateName;
+        
+        // merge the selected template and load the document
+        function mergeTemplate() {
+            var dropDown = document.getElementById("templateName");
+            templateName = dropDown.options[dropDown.selectedIndex].text;
+
+            $.ajax({
+                type: "GET",
+                url: "/Document/MergeTemplate?templateName=" + templateName,
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    TXDocumentViewer.loadDocument(data.document);
+                }
+            });
+        }
+
+        async function finalizeDocument() {
+
+            // export the document with the form fields
+            const saveSettings = { mergeFormFields: true, embedAnnotations: false };
+            const result = await TXDocumentViewer.saveDocument(
+                TXDocumentViewer.StreamType.InternalUnicodeFormat,
+                saveSettings);
+
+            const base64 = await result.base64();
+
+            // finalize the document on the server
+            $.ajax({
+                type: "POST",
+                url: "/Document/Finalize?templateName=" + templateName,
+                data: JSON.stringify(base64),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    var link = document.createElement('a');
+                    link.href = 'data:application/pdf;base64,' + data.document;
+                    link.download = 'document.pdf';
+                    link.click();
+
+                    var documentLoadSettings = {
+                        pdfjs: { 
+	                      workerSourcePath: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs', 
+	                      librarySourcePath: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs'
+	                    }
+                    }
+
+                    // load the document into the viewer
+                    TXDocumentViewer.loadDocument(data.document, "document.pdf", null, documentLoadSettings);
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,86 @@
+﻿@using TXTextControl.Web.MVC
+
+@{
+    ViewData["Title"] = "Design Template";
+    var jsonData = ViewBag.Json;
+    var templateName = ViewBag.TemplateName;
+}
+
+<button id="saveButton" disabled onclick="saveDocument()" class="btn btn-success mb-3" type="button">Save Template</button>
+<a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-success mb-3" type="button">Close</a>
+
+<div class="form-group">
+    <label for="templateName">Template Name</label>
+    <input readonly id="templateName" type="text" value="@templateName" class="form-control mb-3" placeholder="Template Name" />
+</div>
+
+@Html.TXTextControl().TextControl().LoadDataFromJson(jsonData).Render()
+
+<nav class="navbar navbar-light bg-light">
+    <div class="form-inline">
+        <button onclick="loadSampleTemplate()" class="btn btn-sm btn-outline-secondary mx-2" type="button">Load Pre-Designed Template</button>
+    </div>
+</nav>
+
+@section Scripts {
+    <script>
+       var dirtyFlag = false;
+
+        TXTextControl.addEventListener("textControlLoaded", function() {
+            TXTextControl.addEventListener("textControlChanged", function() {
+                dirtyFlag = true;
+                toggleSaveButtonEnabled();
+            })
+        })
+
+        function toggleSaveButtonEnabled() {
+            var saveButton = document.getElementById("saveButton");
+            
+            // enable or disable only when changed
+            if (dirtyFlag) {
+                saveButton.removeAttribute("disabled");
+            } else {
+                saveButton.setAttribute("disabled", "disabled");
+            }
+        }
+
+        function saveDocument() {
+            TXTextControl.saveDocument(TXTextControl.StreamType.InternalUnicodeFormat, document => {
+                dirtyFlag = false;
+
+                // send document.data to endpoint using ajax
+                $.ajax({
+                    type: "POST",
+                    url: "/Document/SaveTemplate?templateName=@templateName",
+                    data: JSON.stringify(document.data),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (response) {
+                        toggleSaveButtonEnabled();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            });
+        }
+
+        function loadSampleTemplate() {
+
+            $.ajax({
+                type: "GET",
+                url: "/Document/LoadTemplate?templateName=sample.tx",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (response) {
+                    TXTextControl.loadDocument(TXTextControl.StreamType.InternalUnicodeFormat, response.document);
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+
+        }
+
+    </script>
+}

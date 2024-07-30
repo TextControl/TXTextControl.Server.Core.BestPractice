@@ -1,0 +1,44 @@
+[
+	{
+		"Doctor": "Peter Jackson M.D.",
+		"Patient": [
+			{
+				"Name": "Jeanette Jo",
+				"DOB": "07/22/1981",
+				"Sex": {
+					"M": false,
+					"F": true
+				},
+				"Pronouns": "She/Her",
+				"History": {
+					"head": false,
+					"seizures": false,
+					"eye": false,
+					"ear": true,
+					"pacemaker": false,
+					"blood": false,
+					"cholesterol": false,
+					"diabetes": false,
+					"anxiety": false,
+					"fainting": false,
+					"dizziness": false,
+					"heart": false,
+					"weight": false,
+					"neck": false,
+					"bone": false
+				},
+				"Allergies": {
+					"allergy1": {
+						"To": "Gluten",
+						"Severity": {
+							"Mild": false,
+							"Moderate": true,
+							"Severe": false
+						},
+						"Reaction": "Abdominal pain"
+					}
+				}
+			}
+		]
+	}
+]

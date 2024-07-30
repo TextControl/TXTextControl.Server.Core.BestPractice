@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title accept-policy">Templates</h5>
+                    <p class="card-text">Design a new template.</p>
+                    <a asp-area="" asp-controller="Home" asp-action="Template" class="btn btn-primary">Create Template</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title fill-form">Merge and Deploy</h5>
+                    <p class="card-text">Merge template and deploy form.</p>
+                    <a asp-area="" asp-controller="Home" asp-action="FillIn" class="btn btn-primary">Merge and Deploy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
